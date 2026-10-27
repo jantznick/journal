@@ -8,6 +8,7 @@ export default function ConfirmModal({
   onSecondary,
   onCancel,
   busy = false,
+  danger = false,
 }) {
   return (
     <div
@@ -15,8 +16,12 @@ export default function ConfirmModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-modal-title"
+      onClick={onCancel}
     >
-      <div className="w-full max-w-md rounded-2xl border border-stone-300 bg-white p-6 shadow-xl">
+      <div
+        className="w-full max-w-md rounded-2xl border border-stone-300 bg-white p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 id="confirm-modal-title" className="font-display text-xl font-semibold text-ink">
           {title}
         </h2>
@@ -26,7 +31,7 @@ export default function ConfirmModal({
             type="button"
             disabled={busy}
             onClick={onCancel}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-muted hover:bg-stone-100 disabled:opacity-50"
+            className="rounded-lg px-4 py-2.5 text-sm font-medium text-muted hover:bg-stone-100 disabled:opacity-50"
           >
             {cancelLabel}
           </button>
@@ -35,7 +40,7 @@ export default function ConfirmModal({
               type="button"
               disabled={busy}
               onClick={onSecondary}
-              className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-semibold text-ink hover:bg-stone-50 disabled:opacity-50"
+              className="rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-stone-50 disabled:opacity-50"
             >
               {secondaryLabel}
             </button>
@@ -44,7 +49,11 @@ export default function ConfirmModal({
             type="button"
             disabled={busy}
             onClick={onConfirm}
-            className="rounded-lg bg-leaf px-4 py-2 text-sm font-semibold text-white hover:bg-leaf-dark disabled:opacity-50"
+            className={`rounded-lg px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 ${
+              danger
+                ? 'bg-red-700 hover:bg-red-800'
+                : 'bg-leaf hover:bg-leaf-dark'
+            }`}
           >
             {busy ? 'Working…' : confirmLabel}
           </button>

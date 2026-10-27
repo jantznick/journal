@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { entriesAPI } from '../api/api';
+import ConfirmModal from '../components/ConfirmModal';
 import { decryptContent } from '../lib/crypto';
 import { themeLabel } from '../lib/themes';
 import useCryptoStore from '../store/cryptoStore';
@@ -31,6 +32,8 @@ export default function EntryDetail() {
   const [error, setError] = useState('');
   const [decryptError, setDecryptError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -70,17 +73,20 @@ export default function EntryDetail() {
   }, [entry, passphrase]);
 
   const remove = async () => {
-    if (!window.confirm('Delete this entry permanently?')) return;
+    setDeleting(true);
+    setError('');
     try {
       await entriesAPI.remove(id);
       navigate('/app/entries');
     } catch (err) {
       setError(err.message);
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
   if (loading) return <p className="text-muted">Loading…</p>;
-  if (error) return <p className="text-red-800">{error}</p>;
+  if (error && !entry) return <p className="text-red-800">{error}</p>;
   if (!entry) return null;
 
   const locked = entry.encrypted && !html;
@@ -113,6 +119,7 @@ export default function EntryDetail() {
       )}
 
       {decryptError && <p className="text-sm text-red-800">{decryptError}</p>}
+      {error && <p className="text-sm text-red-800">{error}</p>}
 
       {locked ? (
         <div className="rounded-lg border border-dashed border-stone-300 px-4 py-10 text-center text-sm text-muted">
@@ -127,11 +134,25 @@ export default function EntryDetail() {
 
       <button
         type="button"
-        onClick={remove}
+        onClick={() => setConfirmDelete(true)}
         className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-100"
       >
         Delete entry
       </button>
+
+      {confirmDelete && (
+        <ConfirmModal
+          title="Delete this entry?"
+          confirmLabel="Delete"
+          cancelLabel="Keep it"
+          danger
+          busy={deleting}
+          onCancel={() => !deleting && setConfirmDelete(false)}
+          onConfirm={remove}
+        >
+          <p>This can’t be undone. The entry will be removed permanently.</p>
+        </ConfirmModal>
+      )}
     </article>
   );
 }
