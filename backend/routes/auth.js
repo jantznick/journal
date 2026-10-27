@@ -325,9 +325,18 @@ router.get('/oidc/callback', async (req, res) => {
     clearOidcTxCookie(res);
     if (req.session?.oidc) delete req.session.oidc;
 
-    const host = req.get('x-forwarded-host') || req.get('host');
-    const proto = (req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0].trim();
-    const currentUrl = `${proto}://${host}${req.originalUrl}`;
+    // Use configured redirect URI so token exchange matches Authentik even when
+    // proxies rewrite X-Forwarded-Proto to http on the internal hop.
+    const redirectBase = (process.env.OIDC_REDIRECT_URI || '').replace(/\/+$/, '');
+    const currentUrl = redirectBase
+      ? `${redirectBase}${req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : ''}`
+      : (() => {
+          const host = req.get('x-forwarded-host') || req.get('host');
+          const proto = (req.get('x-forwarded-proto') || req.protocol || 'https')
+            .split(',')[0]
+            .trim();
+          return `${proto}://${host}${req.originalUrl}`;
+        })();
 
     const tokens = await exchangeCodeForTokens(currentUrl, codeVerifier, state);
     const claims = typeof tokens.claims === 'function' ? tokens.claims() : null;
