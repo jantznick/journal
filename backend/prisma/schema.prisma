@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  oidcSub      String?  @unique
+  displayName  String?
+  defaultTheme String   @default("reflection")
+  /// off | prompts | full — controls whether OpenAI is used for prompts and/or insights
+  aiMode       String   @default("off")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  magicLoginTokens MagicLoginToken[]
+  entries          JournalEntry[]
+  insights         JournalInsight[]
+}
+
+model Session {
+  sid    String   @id @db.VarChar
+  sess   Json
+  expire DateTime @map("expire") @db.Timestamp(6)
+
+  @@map("session")
+}
+
+model MagicLoginToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  otpHash   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model MagicRegisterToken {
+  id        String   @id @default(uuid())
+  email     String
+  tokenHash String   @unique
+  otpHash   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme     String
+  prompt    String
+  /// Plain HTML when encrypted=false; ciphertext (base64) when encrypted=true
+  content   String   @db.Text
+  encrypted Boolean  @default(false)
+  iv        String?
+  salt      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model JournalInsight {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// string[] short bullet insights
+  bullets     Json
+  /// string[] running goals / focus areas
+  goals       Json
+  sourceCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+}

@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Commissioner", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Commissioner", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-paper: #f7f4ef;
+  --color-leaf: #3f6212;
+  --color-leaf-dark: #2d4a0e;
+  --color-moss: #4d7c0f;
+  --color-mist: #e7e5e4;
+  --color-clay: #a8a29e;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(132, 204, 22, 0.12), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(120, 113, 108, 0.12), transparent 50%),
+    linear-gradient(180deg, #faf8f5 0%, #f0ebe3 100%);
+  background-attachment: fixed;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.prose-journal p {
+  margin: 0 0 0.75em;
+}
+
+.prose-journal p:last-child {
+  margin-bottom: 0;
+}
+
+.editor-surface:empty::before {
+  content: attr(data-placeholder);
+  color: #a8a29e;
+  pointer-events: none;
+}
