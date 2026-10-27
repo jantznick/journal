@@ -16,11 +16,18 @@ export async function initializeOIDC() {
     throw new Error('OIDC is not configured');
   }
 
-  oidcConfig = await client.discovery(
-    new URL(process.env.OIDC_ISSUER_URL),
-    process.env.OIDC_CLIENT_ID,
-    process.env.OIDC_CLIENT_SECRET,
-  );
+  const issuer = process.env.OIDC_ISSUER_URL;
+  try {
+    oidcConfig = await client.discovery(
+      new URL(issuer),
+      process.env.OIDC_CLIENT_ID,
+      process.env.OIDC_CLIENT_SECRET,
+    );
+  } catch (err) {
+    oidcConfig = null;
+    const cause = err?.cause?.message || err?.message || String(err);
+    throw new Error(`OIDC discovery failed for ${issuer}: ${cause}`);
+  }
   return oidcConfig;
 }
 
@@ -34,6 +41,9 @@ export function getOIDCConfig() {
 export async function buildAuthorizationUrl(state, codeVerifier) {
   const config = getOIDCConfig();
   const redirectUri = process.env.OIDC_REDIRECT_URI;
+  if (!redirectUri) {
+    throw new Error('OIDC_REDIRECT_URI is not set');
+  }
   const scope = process.env.OIDC_SCOPE || 'openid profile email';
   const codeChallenge = await client.calculatePKCECodeChallenge(codeVerifier);
 

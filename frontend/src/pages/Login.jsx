@@ -82,8 +82,8 @@ export default function Login() {
   const startOidc = async () => {
     setError('');
     try {
-      const { authUrl } = await authAPI.oidcStart();
-      window.location.href = authUrl;
+      const data = await authAPI.oidcStart();
+      window.location.href = data.authUrl;
     } catch (err) {
       setError(err.message);
     }

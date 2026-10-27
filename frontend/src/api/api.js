@@ -12,7 +12,8 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw new Error(error.error || 'Request failed');
+    const msg = [error.error, error.detail].filter(Boolean).join(' — ');
+    throw new Error(msg || 'Request failed');
   }
 
   if (response.status === 204) return null;

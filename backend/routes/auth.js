@@ -11,6 +11,7 @@ import {
   generateState,
   generateCodeVerifier,
 } from '../lib/oidc.js';
+import { setOidcTxCookie, readOidcTxCookie, clearOidcTxCookie } from '../lib/oidcTx.js';
 
 const router = Router();
 
@@ -262,7 +263,7 @@ router.post('/magic-verify', async (req, res) => {
   }
 });
 
-/** Start OIDC login — PKCE verifier stored on express session. */
+/** Start OIDC login — PKCE/state in a short-lived signed cookie (survives Authentik redirect). */
 router.get('/oidc/start', async (req, res) => {
   if (!isOidcConfigured()) {
     return res.status(404).json({ error: 'OIDC is not configured' });
@@ -272,6 +273,8 @@ router.get('/oidc/start', async (req, res) => {
     await initializeOIDC();
     const state = generateState();
     const codeVerifier = generateCodeVerifier();
+    setOidcTxCookie(res, { state, codeVerifier });
+    // Keep a session copy as a secondary source when the cookie round-trips fine.
     req.session.oidc = { state, codeVerifier, createdAt: Date.now() };
     await new Promise((resolve, reject) => {
       req.session.save((err) => (err ? reject(err) : resolve()));
@@ -280,7 +283,10 @@ router.get('/oidc/start', async (req, res) => {
     return res.json({ authUrl: authUrl.href });
   } catch (e) {
     console.error('[auth] oidc start:', e);
-    return res.status(500).json({ error: 'Failed to start OIDC login' });
+    return res.status(500).json({
+      error: 'Failed to start OIDC login',
+      detail: e?.message || String(e),
+    });
   }
 });
 
@@ -293,22 +299,34 @@ router.get('/oidc/callback', async (req, res) => {
   try {
     const { code, state, error } = req.query;
     if (error) {
+      clearOidcTxCookie(res);
       return res.redirect(`${fe}/login?error=${encodeURIComponent(String(error))}`);
     }
     if (!code || !state) {
+      clearOidcTxCookie(res);
       return res.redirect(`${fe}/login?error=missing_code`);
     }
 
-    const stored = req.session?.oidc;
-    if (!stored || stored.state !== state) {
+    const fromCookie = readOidcTxCookie(req);
+    const fromSession = req.session?.oidc;
+    const stored =
+      fromCookie?.state === state
+        ? fromCookie
+        : fromSession?.state === state
+          ? fromSession
+          : null;
+
+    if (!stored) {
+      clearOidcTxCookie(res);
       return res.redirect(`${fe}/login?error=invalid_state`);
     }
 
     const codeVerifier = stored.codeVerifier;
-    delete req.session.oidc;
+    clearOidcTxCookie(res);
+    if (req.session?.oidc) delete req.session.oidc;
 
     const host = req.get('x-forwarded-host') || req.get('host');
-    const proto = req.get('x-forwarded-proto') || req.protocol;
+    const proto = (req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0].trim();
     const currentUrl = `${proto}://${host}${req.originalUrl}`;
 
     const tokens = await exchangeCodeForTokens(currentUrl, codeVerifier, state);
@@ -348,6 +366,7 @@ router.get('/oidc/callback', async (req, res) => {
     return res.redirect(`${fe}/app`);
   } catch (e) {
     console.error('[auth] oidc callback:', e);
+    clearOidcTxCookie(res);
     return res.redirect(`${fe}/login?error=oidc_failed`);
   }
 });
