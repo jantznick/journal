@@ -44,6 +44,9 @@ When `OIDC_ISSUER_URL`, `OIDC_CLIENT_ID`, and `OIDC_CLIENT_SECRET` are set, logi
 
 - Redirect URI must match `OIDC_REDIRECT_URI` (Compose default: `http://localhost/api/auth/oidc/callback`).
 - Email claim is required; accounts are linked by email across magic and OIDC.
+- **Authentik Launch URL** (auto-start SSO from the Authentik apps list):  
+  `https://journal.example.com/api/auth/oidc/start?redirect=1`  
+  or the alias `https://journal.example.com/sso`.
 
 ### AI models
 

@@ -280,6 +280,15 @@ router.get('/oidc/start', async (req, res) => {
       req.session.save((err) => (err ? reject(err) : resolve()));
     });
     const authUrl = await buildAuthorizationUrl(state, codeVerifier);
+    // ?redirect=1 → 302 to Authentik (use as Authentik Launch URL).
+    // Default stays JSON for the in-app "Sign in with SSO" button.
+    const wantsRedirect =
+      req.query.redirect === '1' ||
+      req.query.redirect === 'true' ||
+      String(req.query.redirect || '').toLowerCase() === 'yes';
+    if (wantsRedirect) {
+      return res.redirect(authUrl.href);
+    }
     return res.json({ authUrl: authUrl.href });
   } catch (e) {
     console.error('[auth] oidc start:', e);

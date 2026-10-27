@@ -7,6 +7,7 @@ import useAuthStore from './store/authStore';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Sso from './pages/Sso';
 import Write from './pages/Write';
 import Entries from './pages/Entries';
 import EntryDetail from './pages/EntryDetail';
@@ -56,6 +57,7 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/sso" element={<Sso />} />
       <Route path="/app" element={<AppLayout />}>
         <Route index element={<Write />} />
         <Route path="entries" element={<Entries />} />
