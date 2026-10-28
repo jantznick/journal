@@ -1,12 +1,55 @@
-/** Client-side copy of starter themes for dropdowns (labels only — no tech ids in UI). */
-export const STARTER_THEMES = [
-  { id: 'reflection', label: 'Reflection' },
-  { id: 'gratitude', label: 'Gratitude' },
-  { id: 'anxiety', label: 'Anxiety & calm' },
-  { id: 'goals', label: 'Goals & progress' },
-  { id: 'relationships', label: 'Relationships' },
-  { id: 'freewrite', label: 'Free write' },
+/**
+ * Client-side copy of starter themes for dropdowns (labels only — no tech ids in UI).
+ * Keep ids/labels in sync with backend/lib/themes.js.
+ */
+export const STARTER_THEME_GROUPS = [
+  {
+    id: 'inward',
+    label: 'Looking inward',
+    themes: [
+      { id: 'reflection', label: 'Reflection' },
+      { id: 'mental-health', label: 'Mental health' },
+      { id: 'anxiety', label: 'Anxiety' },
+      { id: 'calm', label: 'Calm & grounding' },
+      { id: 'stress', label: 'Stress' },
+      { id: 'self-compassion', label: 'Self-compassion' },
+    ],
+  },
+  {
+    id: 'body',
+    label: 'Body & energy',
+    themes: [
+      { id: 'physical', label: 'Physical health' },
+      { id: 'sleep', label: 'Sleep & rest' },
+      { id: 'energy', label: 'Energy & movement' },
+    ],
+  },
+  {
+    id: 'growth',
+    label: 'Growth & meaning',
+    themes: [
+      { id: 'gratitude', label: 'Gratitude' },
+      { id: 'goals', label: 'Goals & progress' },
+      { id: 'mindfulness', label: 'Mindfulness' },
+      { id: 'creativity', label: 'Creativity' },
+    ],
+  },
+  {
+    id: 'life',
+    label: 'People & work',
+    themes: [
+      { id: 'relationships', label: 'Relationships' },
+      { id: 'work', label: 'Work & career' },
+    ],
+  },
+  {
+    id: 'open',
+    label: 'Open',
+    themes: [{ id: 'freewrite', label: 'Free write' }],
+  },
 ];
+
+export const STARTER_THEMES = STARTER_THEME_GROUPS.flatMap((g) => g.themes);
 
 export function isStarterTheme(value) {
   return STARTER_THEMES.some((t) => t.id === value);

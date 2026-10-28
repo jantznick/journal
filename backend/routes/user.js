@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
-import { STARTER_THEMES } from '../lib/themes.js';
+import { STARTER_THEME_GROUPS, STARTER_THEMES } from '../lib/themes.js';
 import { AI_MODES, normalizeAiMode } from '../lib/aiMode.js';
 
 const router = Router();
@@ -14,7 +14,7 @@ const userSelect = {
 };
 
 router.get('/themes', (_req, res) => {
-  res.json({ themes: STARTER_THEMES });
+  res.json({ themes: STARTER_THEMES, groups: STARTER_THEME_GROUPS });
 });
 
 router.get('/profile', async (req, res) => {
