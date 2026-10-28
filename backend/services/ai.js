@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { themeLabel } from '../lib/themes.js';
+import { pickFallbackPrompt, themeLabel } from '../lib/themes.js';
 
 let client = null;
 
@@ -24,26 +24,8 @@ export function getModel() {
   return process.env.OPENAI_MODEL || 'gpt-4o-mini';
 }
 
-const FALLBACK_PROMPTS = {
-  reflection:
-    'What moment from today keeps coming back to you — and what do you think it is trying to tell you?',
-  gratitude:
-    'Name three small things that made today a little better. Why did each one matter?',
-  anxiety:
-    'What is weighing on you right now? Write it out, then note one thing that is still within your control.',
-  goals:
-    'What are you working toward lately? Where did you make progress, stall, or learn something useful?',
-  relationships:
-    'How did you show up in your relationships today? Is there a conversation you want to have — or one you are glad you had?',
-  freewrite: 'What do you need to get off your mind tonight? Start anywhere and keep going.',
-};
-
 function fallbackPrompt(theme) {
-  const key = String(theme || '').toLowerCase();
-  return (
-    FALLBACK_PROMPTS[key] ||
-    `A user in a journaling app needs a thoughtful prompt. They are focused on "${themeLabel(theme)}". Ask one open, warm question that invites honest writing.`
-  );
+  return pickFallbackPrompt(theme);
 }
 
 /**

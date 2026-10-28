@@ -1,7 +1,7 @@
-import { STARTER_THEMES, isStarterTheme } from '../lib/themes';
+import { STARTER_THEME_GROUPS, isStarterTheme } from '../lib/themes';
 
 /**
- * Dropdown of friendly theme labels + Other for a custom phrase.
+ * Dropdown of friendly theme labels (grouped) + Other for a custom phrase.
  * `value` is a starter id or a custom string.
  */
 export default function ThemeSelect({
@@ -27,10 +27,14 @@ export default function ThemeSelect({
         }}
         className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-leaf"
       >
-        {STARTER_THEMES.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.label}
-          </option>
+        {STARTER_THEME_GROUPS.map((group) => (
+          <optgroup key={group.id} label={group.label}>
+            {group.themes.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.label}
+              </option>
+            ))}
+          </optgroup>
         ))}
         <option value="__other__">Other…</option>
       </select>
