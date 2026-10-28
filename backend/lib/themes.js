@@ -104,6 +104,62 @@ export const STARTER_THEME_GROUPS = [
     ],
   },
   {
+    id: 'character',
+    label: 'Character & habits',
+    themes: [
+      {
+        id: 'self-awareness',
+        label: 'Self-awareness',
+        description: 'Notice patterns in how you think, react, and show up.',
+      },
+      {
+        id: 'consideration',
+        label: 'Consideration',
+        description: 'Practice noticing others’ needs and how your actions land.',
+      },
+      {
+        id: 'competitiveness',
+        label: 'Ease competitiveness',
+        description: 'Catch comparison and win/lose habits; choose collaboration instead.',
+      },
+      {
+        id: 'slowing-down',
+        label: 'Slowing down',
+        description: 'Make room to relax, pause, and stop rushing through the day.',
+      },
+      {
+        id: 'patience',
+        label: 'Patience',
+        description: 'Watch where urgency or irritation shows up, and practice waiting well.',
+      },
+      {
+        id: 'confidence',
+        label: 'Confidence',
+        description: 'Build steady self-trust without needing to prove yourself.',
+      },
+      {
+        id: 'boundaries',
+        label: 'Boundaries',
+        description: 'Notice where you overextend, people-please, or shut people out.',
+      },
+      {
+        id: 'authenticity',
+        label: 'Authenticity',
+        description: 'Check when you perform versus when you feel like yourself.',
+      },
+      {
+        id: 'empathy',
+        label: 'Empathy',
+        description: 'Stretch into other perspectives without losing your own.',
+      },
+      {
+        id: 'consistency',
+        label: 'Consistency',
+        description: 'Track follow-through on the small habits that shape who you become.',
+      },
+    ],
+  },
+  {
     id: 'open',
     label: 'Open',
     themes: [
@@ -234,6 +290,76 @@ export const FALLBACK_PROMPTS = {
     'What have you not said out loud that still wants space?',
     'If nobody would read this, what would you admit?',
     'Start with “Lately I’ve been noticing…” and see where the pen goes.',
+  ],
+  'self-awareness': [
+    'What pattern in yourself did you notice today — a reaction, a habit, a story you tell?',
+    'When were you most and least like “yourself” today? What changed between those moments?',
+    'What triggered a strong reaction recently? Trace it back: situation → thought → feeling → action.',
+    'If you watched yourself from the outside for an hour, what would stand out?',
+    'Name one assumption you made about yourself lately. Is it still true?',
+  ],
+  consideration: [
+    'Where did you make room for someone else’s needs today — or miss a chance to?',
+    'Think of a recent interaction: how might the other person have experienced you?',
+    'What would “being more considerate” look like in one concrete situation this week?',
+    'Is there someone you have been taking for granted? What would a thoughtful gesture be?',
+    'When did you listen fully versus waiting for your turn to talk?',
+  ],
+  competitiveness: [
+    'Where did comparison or a need to win show up today? What did it cost you (or someone else)?',
+    'Describe a moment you chose collaboration over competition — or wish you had.',
+    'What are you competing for right now, and is that race still worth running?',
+    'If you released the scoreboard for one relationship or project, what would change?',
+    'When does competitiveness feel useful to you, and when does it turn sharp or draining?',
+  ],
+  'slowing-down': [
+    'Where did you rush today when you could have taken a breath?',
+    'What would a genuinely relaxed hour look like for you — not productive, just restful?',
+    'What keeps you from slowing down: guilt, FOMO, habit, other people? Be honest.',
+    'Recall a recent moment of ease. What made it possible, and how could you invite more of that?',
+    'Design tomorrow with one intentional pause built in. What will you protect?',
+  ],
+  patience: [
+    'Where did impatience show up today — in traffic, with people, with yourself?',
+    'What are you waiting on that feels hard? What would waiting well look like?',
+    'Describe the last time you forced an outcome. What happened, and what might patience have offered?',
+    'Who or what tests your patience most right now, and what is that teaching you?',
+    'Practice writing the slower version of a decision you are tempted to rush.',
+  ],
+  confidence: [
+    'Where did you trust yourself today — and where did you shrink or overcompensate?',
+    'What evidence do you have that you can handle hard things, even if you doubt it tonight?',
+    'Is there a place you are waiting for permission? What if you already have enough?',
+    'Separate confidence from arrogance for a moment: what does quiet self-trust look like for you?',
+    'Name one small risk you could take this week that would stretch your confidence gently.',
+  ],
+  boundaries: [
+    'Where did you say yes when you meant no — or no when you needed connection?',
+    'What boundary would make the next few days more sustainable?',
+    'Describe a relationship or commitment where the line feels blurry. What do you need?',
+    'How do you feel after protecting a boundary — guilty, relieved, both?',
+    'What is one clear sentence you could use next time you need to hold a limit?',
+  ],
+  authenticity: [
+    'When today did you feel most like yourself, and when were you performing?',
+    'What part of you stays hidden in certain rooms — and what would it take to show a little more?',
+    'Is there an opinion, preference, or need you softened to keep the peace?',
+    'Write about a time you were honest and it went better (or worse) than expected.',
+    'If you dropped one mask this week, which would it be?',
+  ],
+  empathy: [
+    'Whose shoes could you try on today? What might their day have felt like?',
+    'Where did you assume motive instead of curiosity? Rewrite that moment with empathy.',
+    'When is empathy easy for you, and when do you shut it off?',
+    'How do you stay open to someone else’s feelings without abandoning your own?',
+    'Recall a disagreement. Argue their side fairly for a few sentences.',
+  ],
+  consistency: [
+    'Which small habit moved forward today, even a little — and which slipped?',
+    'What keeps getting in the way of the consistency you want? Be specific, not harsh.',
+    'If you could only keep one daily practice for the next month, what would it be and why?',
+    'How do you talk to yourself after a missed day — and how would a coach reframe it?',
+    'Design the easiest possible version of a habit you care about, so showing up is almost automatic.',
   ],
 };
 

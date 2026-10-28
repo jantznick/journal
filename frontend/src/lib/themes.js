@@ -43,6 +43,22 @@ export const STARTER_THEME_GROUPS = [
     ],
   },
   {
+    id: 'character',
+    label: 'Character & habits',
+    themes: [
+      { id: 'self-awareness', label: 'Self-awareness' },
+      { id: 'consideration', label: 'Consideration' },
+      { id: 'competitiveness', label: 'Ease competitiveness' },
+      { id: 'slowing-down', label: 'Slowing down' },
+      { id: 'patience', label: 'Patience' },
+      { id: 'confidence', label: 'Confidence' },
+      { id: 'boundaries', label: 'Boundaries' },
+      { id: 'authenticity', label: 'Authenticity' },
+      { id: 'empathy', label: 'Empathy' },
+      { id: 'consistency', label: 'Consistency' },
+    ],
+  },
+  {
     id: 'open',
     label: 'Open',
     themes: [{ id: 'freewrite', label: 'Free write' }],
