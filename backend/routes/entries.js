@@ -40,12 +40,25 @@ function serializeEntry(entry, { includeContent = true } = {}) {
 
 router.get('/', async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 50, 100);
-  const entries = await prisma.journalEntry.findMany({
-    where: { userId: req.session.userId },
-    orderBy: { createdAt: 'desc' },
-    take: limit,
+  const offset = Math.max(Number(req.query.offset) || 0, 0);
+  const where = { userId: req.session.userId };
+  if (req.query.encrypted === 'true') where.encrypted = true;
+  if (req.query.encrypted === 'false') where.encrypted = false;
+
+  const [entries, total] = await Promise.all([
+    prisma.journalEntry.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
+    }),
+    prisma.journalEntry.count({ where }),
+  ]);
+
+  return res.json({
+    entries: entries.map((e) => serializeEntry(e)),
+    total,
   });
-  return res.json({ entries: entries.map((e) => serializeEntry(e)) });
 });
 
 router.get('/:id', async (req, res) => {

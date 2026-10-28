@@ -56,6 +56,7 @@ Default `OPENAI_MODEL=gpt-4o-mini` is fine for prompts and short summaries. For 
 
 - Client derives a key with PBKDF2 (210k iterations) + AES-GCM.
 - Encrypted entries show as locked placeholders until the passphrase is entered for the session.
+- After unlocking a key, **Settings → Privacy** can encrypt older plain-text entries with that key (client-side, then saved via the API).
 - Encrypted content is **never** sent to OpenAI for insights.
 
 ## Project layout

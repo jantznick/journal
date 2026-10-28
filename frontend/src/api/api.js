@@ -45,7 +45,21 @@ export const userAPI = {
 };
 
 export const entriesAPI = {
-  list: (limit = 50) => request(`/entries?limit=${limit}`),
+  list: (limitOrOpts = 50, maybeOpts = {}) => {
+    const opts =
+      typeof limitOrOpts === 'object' && limitOrOpts !== null
+        ? limitOrOpts
+        : { limit: limitOrOpts, ...maybeOpts };
+    const limit = opts.limit ?? 50;
+    const offset = opts.offset ?? 0;
+    const params = new URLSearchParams({
+      limit: String(limit),
+      offset: String(offset),
+    });
+    if (opts.encrypted === true) params.set('encrypted', 'true');
+    if (opts.encrypted === false) params.set('encrypted', 'false');
+    return request(`/entries?${params}`);
+  },
   get: (id) => request(`/entries/${id}`),
   prompt: (theme) =>
     request('/entries/prompt', { method: 'POST', body: JSON.stringify({ theme }) }),

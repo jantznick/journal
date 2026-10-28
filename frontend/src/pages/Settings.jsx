@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { userAPI } from '../api/api';
+import ConfirmModal from '../components/ConfirmModal';
 import ThemeSelect from '../components/ThemeSelect';
+import { countPlaintextEntries, encryptExistingEntries } from '../lib/encryptExisting';
 import useAuthStore from '../store/authStore';
+import useCryptoStore from '../store/cryptoStore';
 
 const AI_OPTIONS = [
   {
@@ -31,12 +34,46 @@ const AI_OPTIONS = [
 
 export default function Settings() {
   const { user, setUser } = useAuthStore();
+  const unlocked = useCryptoStore((s) => s.unlocked);
+  const passphrase = useCryptoStore((s) => s.passphrase);
+
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [defaultTheme, setDefaultTheme] = useState(user?.defaultTheme || 'reflection');
   const [aiMode, setAiMode] = useState(user?.aiMode || 'off');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const [plainCount, setPlainCount] = useState(null);
+  const [plainCountError, setPlainCountError] = useState('');
+  const [confirmEncrypt, setConfirmEncrypt] = useState(false);
+  const [encrypting, setEncrypting] = useState(false);
+  const [encryptProgress, setEncryptProgress] = useState(null);
+  const [encryptStatus, setEncryptStatus] = useState('');
+  const [encryptError, setEncryptError] = useState('');
+
+  useEffect(() => {
+    if (!unlocked) {
+      setPlainCount(null);
+      setPlainCountError('');
+      return;
+    }
+    let cancelled = false;
+    setPlainCountError('');
+    countPlaintextEntries()
+      .then((n) => {
+        if (!cancelled) setPlainCount(n);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setPlainCount(null);
+          setPlainCountError(err.message || 'Could not check entries.');
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [unlocked]);
 
   const save = async (e) => {
     e.preventDefault();
@@ -60,6 +97,40 @@ export default function Settings() {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const runEncryptExisting = async () => {
+    if (!passphrase) return;
+    setEncrypting(true);
+    setEncryptError('');
+    setEncryptStatus('');
+    setEncryptProgress({ done: 0, total: plainCount || 0 });
+    try {
+      const result = await encryptExistingEntries(passphrase, {
+        onProgress: (p) => setEncryptProgress(p),
+      });
+      setPlainCount(result.failures.length);
+      if (result.total === 0) {
+        setEncryptStatus('Nothing to encrypt — all entries are already private.');
+      } else if (result.failures.length === 0) {
+        setEncryptStatus(
+          result.done === 1
+            ? 'Encrypted 1 older entry with your key.'
+            : `Encrypted ${result.done} older entries with your key.`,
+        );
+      } else {
+        setEncryptStatus(
+          `Encrypted ${result.done} of ${result.total}. ${result.failures.length} failed — try again.`,
+        );
+        setEncryptError(result.failures[0]?.error || 'Some entries could not be encrypted.');
+      }
+      setConfirmEncrypt(false);
+    } catch (err) {
+      setEncryptError(err.message || 'Could not encrypt entries.');
+    } finally {
+      setEncrypting(false);
+      setEncryptProgress(null);
     }
   };
 
@@ -143,6 +214,45 @@ export default function Settings() {
         </button>
       </form>
 
+      <section className="space-y-3 rounded-xl border border-stone-300 bg-white/80 p-4 sm:p-5">
+        <h2 className="font-display text-xl font-semibold text-ink">Privacy</h2>
+        {!unlocked ? (
+          <p className="text-sm leading-relaxed text-muted">
+            Unlock an encryption key in the top bar, then you can encrypt older entries that were
+            saved as plain text.
+          </p>
+        ) : (
+          <>
+            <p className="text-sm leading-relaxed text-muted">
+              Your key is unlocked for this session. New private entries use it automatically. Older
+              plain-text entries stay readable on the server until you encrypt them here.
+            </p>
+            {plainCountError && <p className="text-sm text-red-800">{plainCountError}</p>}
+            {encryptError && <p className="text-sm text-red-800">{encryptError}</p>}
+            {encryptStatus && <p className="text-sm text-muted">{encryptStatus}</p>}
+            {plainCount === null && !plainCountError ? (
+              <p className="text-sm text-muted">Checking older entries…</p>
+            ) : plainCount === 0 ? (
+              <p className="text-sm text-muted">All saved entries are already private.</p>
+            ) : plainCount > 0 ? (
+              <button
+                type="button"
+                disabled={encrypting}
+                onClick={() => {
+                  setEncryptError('');
+                  setConfirmEncrypt(true);
+                }}
+                className="rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-sm font-semibold text-ink hover:bg-stone-50 disabled:opacity-60"
+              >
+                {plainCount === 1
+                  ? 'Encrypt 1 older entry'
+                  : `Encrypt ${plainCount} older entries`}
+              </button>
+            ) : null}
+          </>
+        )}
+      </section>
+
       <section className="space-y-3 rounded-xl border border-stone-300 bg-white/70 p-4 sm:p-5">
         <h2 className="font-display text-xl font-semibold text-ink">How Journal works</h2>
         <ul className="space-y-3 text-sm leading-relaxed text-muted">
@@ -153,7 +263,8 @@ export default function Settings() {
           <li>
             <span className="font-medium text-ink">Privacy.</span> Optional encryption happens in
             your browser before save. Unlock a key in the top bar — it stays in memory until you
-            sign out. Store that key in a password manager.
+            sign out. Store that key in a password manager. After unlocking, Settings can encrypt
+            older plain-text entries with the same key.
           </li>
           <li>
             <span className="font-medium text-ink">Insights.</span> Summaries turn recent entries
@@ -166,6 +277,31 @@ export default function Settings() {
           </li>
         </ul>
       </section>
+
+      {confirmEncrypt && (
+        <ConfirmModal
+          title="Encrypt older entries?"
+          confirmLabel={
+            encryptProgress
+              ? `Encrypting ${encryptProgress.done}/${encryptProgress.total}…`
+              : 'Encrypt with this key'
+          }
+          cancelLabel="Cancel"
+          busy={encrypting}
+          onCancel={() => !encrypting && setConfirmEncrypt(false)}
+          onConfirm={runEncryptExisting}
+        >
+          <p>
+            {plainCount === 1
+              ? '1 plain-text entry will be encrypted in this browser with your current key, then stored only as ciphertext.'
+              : `${plainCount} plain-text entries will be encrypted in this browser with your current key, then stored only as ciphertext.`}
+          </p>
+          <p className="mt-2">
+            You will need this same key to read them later. Make sure it is saved in a password
+            manager before continuing.
+          </p>
+        </ConfirmModal>
+      )}
     </div>
   );
 }
